@@ -19,7 +19,7 @@ Main objectives:
 # Structure
 ## Files
 ```bash
-├── README.md
+**
 ├── data
 │   ├── PM25_combined_2014_2019_2024.csv
 │   └── PM25_combined_2015_2018_2021_2024.csv
@@ -30,7 +30,25 @@ Main objectives:
 ├── scripts
 │   ├── analyse_data.py
 │   └── load_data.py
-└── test_cleaning.py
+└── test_cleaning.py**mini_project_ZTPDB_1
+├── Snakefile_task4
+├── config/
+│   └── task4.yaml
+├── src/
+│   ├── pm25/
+│   │   └── run_pm25_year.py
+│   └── literature/
+│       └── pubmed_fetch.py
+├── results/
+│   ├── pm25/
+│   │   └── {YEAR}/
+│   ├── literature/
+│   │   └── {YEAR}/
+│   └── report_task4.md
+├── scripts/        
+├── tests/
+├── README.md
+
 ```
 ## Data
 ### Station code
