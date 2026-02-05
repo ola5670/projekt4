@@ -1,21 +1,22 @@
 configfile: "config/task4.yaml"
 
 YEARS = config["years"]
+CITIES = config.get("cities", [])
 
 
 rule all:
     input:
         "results/report_task4.md",
         
-
-
 rule pm25_year:
     output:
         daily="results/pm25/{year}/daily_means.csv",
         exceed="results/pm25/{year}/exceedance_days.csv"
+    params:
+        cities_list = ",".join(CITIES) 
     shell:
         """
-        python src/pm25/run_pm25_year.py --year {wildcards.year}
+        python src/pm25/run_pm25_year.py --year {wildcards.year} --cities "{params.cities_list}"
         """
 
 rule pubmed_year:
@@ -24,7 +25,7 @@ rule pubmed_year:
         summary="results/literature/{year}/summary_by_year.csv",
         top10="results/literature/{year}/top_10_journals.csv"
     log:
-        temp("logs/pubmed_{year}.log")  # <-- temp() zapewnia brak blokad
+        temp("logs/pubmed_{year}.log")  
     params:
         config="config/task4.yaml"
     shell:
@@ -33,7 +34,6 @@ rule pubmed_year:
         --year {wildcards.year} \
         --config {params.config}
         """
-
 
 rule report_task4:
     input:
@@ -54,9 +54,11 @@ rule report_task4:
             for year, pm_file, mean_file in zip(YEARS, input.pm25, input.pm25_means):
                 df_days = pd.read_csv(pm_file)
                 df_means = pd.read_csv(mean_file)
+                total_exceedances = df_days["exceedance_days"].sum()
 
                 f.write(f"### Rok {year}\n")
-                f.write(f"- Liczba dni z przekroczeniem normy: {len(df_days)}\n")
+                f.write(f"- Liczba stacji: {len(df_days)}\n")
+                f.write(f"- Suma dni przekraczających normę: {total_exceedances}\n")
                 f.write("- Przykładowe średnie dobowe:\n\n")
                 f.write(df_means.head().to_markdown(index=False))
                 f.write("\n\n")

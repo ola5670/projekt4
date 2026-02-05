@@ -23,7 +23,6 @@ def test_parse_pubmed_date():
 
 def test_pubmed_output_csv(tmp_path):
     """Testuje zapis i wczytanie CSV z dodatkową kolumną Year po parsowaniu dat."""
-    # symulacja danych PubMed
     df = pd.DataFrame({
         "Title": ["Paper A", "Paper B"],
         "PubMedDate": ["2021 Jan 15", "2021 Feb 10"]
@@ -31,11 +30,9 @@ def test_pubmed_output_csv(tmp_path):
 
     df["Year"] = df["PubMedDate"].apply(parse_pubmed_date)
 
-    # zapis do tymczasowego pliku CSV
     out_file = tmp_path / "pubmed_test.csv"
     df.to_csv(out_file, index=False)
 
-    # wczytanie i sprawdzenie poprawności
     df_read = pd.read_csv(out_file)
     assert "Year" in df_read.columns
     assert df_read["Year"].tolist() == [2021, 2021]
