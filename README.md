@@ -1,61 +1,89 @@
-# Project overview
-## Analysis
-Project 3 focuses on the analysis of PM2.5 air pollution data collected from measurement stations in Poland.
-The project is implemented in a *function-oriented design*, where all data loading, preprocessing, analysis, and visualization logic is encapsulated in reusable Python functions located in `scripts`. The notebook `projekt_3_student.ipynb` serves as the execution and presentation layer.
+# Task 4 – Analiza PM2.5 i PubMed
 
-Main objectives: 
-- Load and clean air quality measurement data
-- Calculate monthly averages of PM2.5 concentrations
-- Visualize trends using heatmaps
-- Identify days on which PM2.5 concentration exceeded the accepted norm
-## Python and github functionality 
-We use additional github and python functionality, creating tests, and make them automatically run while doing `push` and `pull` operations.
+## Opis
 
-Main objectives:
-- Make tests for download and manipulate data manipulation functions 
-- Create script for github that run tests after commit push
+Pipeline wykonuje analizę danych PM2.5 oraz literatury naukowej z PubMed dla wybranych lat. Wyniki są zapisywane w osobnych katalogach per rok, co pozwala zachować dane historyczne i nie nadpisywać wcześniejszych wyników.
 
+## Struktura katalogów wyników
 
-# Structure
-## Files
+results/
+├── pm25/
+│   ├── 2021/ (daily_means.csv, exceedance_days.csv)
+│   └── 2024/ ...
+├── literature/
+│   ├── 2021/ (pubmed_papers.csv, summary_by_year.csv, top_10_journals.csv)
+│   └── 2024/ ...
+└── report_task4.md
+
+W pliku config/task4.yaml ustawiasz lata do analizy oraz dane PubMed:
+1. years:
+  - 2021
+  - 2024
+
+2. pubmed:
+
+    - email: "twoj_email@example.com"
+   
+    - queries:
+
+     - "PM2.5 air pollution"
+     - "particulate matter health"
+    - max_results: 200
+
+## Uruchamianie pipeline
+
+Uruchomienie pipeline dla wszystkich lat z configu:
+
 ```bash
-├── README.md
-├── data
-│   ├── PM25_combined_2014_2019_2024.csv
-│   └── PM25_combined_2015_2018_2021_2024.csv
-├── main.py
-├── projekt_1_student.ipynb
-├── projekt_3_student.ipynb
-├── requirements.txt
-├── scripts
-│   ├── analyse_data.py
-│   └── load_data.py
-└── test_cleaning.py
+snakemake -s Snakefile_task4 --cores 2
 ```
-## Data
-### Station code
-Measurement stations are identified using a standardized station code format:
+Pipeline liczy PM2.5 dla wskazanych lat.
+
+Pobiera dane PubMed i generuje podsumowania.
+Tworzy raport results/report_task4.md.
+
+# Scenariusze użycia
+
+Pierwsze uruchomienie
+years: [2021, 2024] → pipeline policzy wszystkie lata i wygeneruje raport.
+
+Aktualizacja konfiguracji
+- Zmiana configu na years: [2019, 2024] → pipeline:
+
+  - policzy brakujące dane PM2.5 dla 2019,
+
+  - pobierze/analitykę PubMed dla 2019,
+
+  - wygeneruje raport agregujący 2019 i 2024.
+
+Snakemake pominie lata już policzone (tu: 2024).
+
+# Testy
+
+Pipeline posiada testy pytest w katalogu tests/.
+
+Przykładowy test sprawdza parsowanie roku z dat PubMed:
 ```bash
-WwPp\*Nn\*
+pytest tests/test_pubmed_fetch.py -v
 ```
-Where
-- Ww – voivodeship (region) code
-- Pp – county (powiat) code
-- Nn – station name
-- x = [:lower:]
-- X = [:upper:]
-## Notebook Workflow (projekt_3_student.ipynb)
-The notebook follows a structured execution flow:
-1. Import required libraries
-2. Import functions from load_data.py and analyse_data.py
-3. Load and clean the dataset
-4. Perform monthly average calculations
-5. Generate heatmaps
-6. Identify days exceeding PM2.5 norms
-7. Present results using tables and plots
+Test sprawdza, czy:
 
+- różne formaty dat PubMed są poprawnie konwertowane na rok,
 
-# Remarks
-## Tests
-`test_no_metadata_rows` will not pass on *github.com* because the file with metadata is to big to be loaded. This test only works on local computers.
+- zapis i wczytanie CSV z kolumną Year działa poprawnie.
 
+## Deterministyczność
+
+Kod pubmed_fetch.py działa deterministycznie przy tym samym configu i wejściu – ten sam zestaw publikacji i format wyjścia.
+
+Wszystkie dane są zapisywane w katalogach per rok, co gwarantuje, że istniejące wyniki nie są nadpisywane.
+
+## Logi
+
+Każdy rok PubMed generuje własny log w logs/pubmed_{year}.log.
+
+Standardowe logi PM2.5 są wyświetlane na stdout.
+
+## Weryfikacja
+
+Weryfikacja braku redundancji (pomijania roku 2024) odbywa się poprzez analizę sekcji Job stats. Przy ponownym uruchomieniu dla lat [2021, 2024], liczba zadań (count) dla reguł pm25_year oraz pubmed_year wynosi 1, co dowodzi, że Snakemake przetwarza tylko nowo dodany rok 2021, uznając wyniki dla 2024 za aktualne

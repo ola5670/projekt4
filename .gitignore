@@ -1,6 +1,12 @@
-# files
-*.csv
+# Python
+__pycache__/
+*.py[cod]
 
-# files
-__pycache__
-.pytest_cache
+# Snakemake
+.snakemake/
+logs/
+results/
+
+# Środowisko i system
+.venv/
+.DS_Store

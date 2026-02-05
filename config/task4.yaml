@@ -1,0 +1,16 @@
+years: [2018, 2024]
+
+cities:
+  - Warszawa
+  - Katowice
+
+pm25:
+  daily_limit: 15
+
+pubmed:
+  email: "twój_mail@student.uw.edu.pl"
+  queries:
+    - "PM2.5 air pollution"
+    - "particulate matter health"
+  max_results: 200
+
