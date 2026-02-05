@@ -5,7 +5,7 @@
 Pipeline wykonuje analizę danych PM2.5 oraz literatury naukowej z PubMed dla wybranych lat. Wyniki są zapisywane w osobnych katalogach per rok, co pozwala zachować dane historyczne i nie nadpisywać wcześniejszych wyników.
 
 ## Struktura katalogów wyników
-
+```
 results/
 ├── pm25/
 │   ├── 2021/ (daily_means.csv, exceedance_days.csv)
@@ -14,11 +14,11 @@ results/
 │   ├── 2021/ (pubmed_papers.csv, summary_by_year.csv, top_10_journals.csv)
 │   └── 2024/ ...
 └── report_task4.md
-
+```
 W pliku config/task4.yaml ustawiasz lata do analizy oraz dane PubMed:
 1. years:
-  - 2021
-  - 2024
+   - 2021
+   -  2024
 
 2. pubmed:
 
@@ -35,40 +35,7 @@ W pliku config/task4.yaml ustawiasz lata do analizy oraz dane PubMed:
 Uruchomienie pipeline dla wszystkich lat z configu:
 
 ```bash
-<<<<<<< HEAD
 snakemake -s Snakefile_task4 --cores 2
-=======
-**
-├── data
-│   ├── PM25_combined_2014_2019_2024.csv
-│   └── PM25_combined_2015_2018_2021_2024.csv
-├── main.py
-├── projekt_1_student.ipynb
-├── projekt_3_student.ipynb
-├── requirements.txt
-├── scripts
-│   ├── analyse_data.py
-│   └── load_data.py
-└── test_cleaning.py**mini_project_ZTPDB_1
-├── Snakefile_task4
-├── config/
-│   └── task4.yaml
-├── src/
-│   ├── pm25/
-│   │   └── run_pm25_year.py
-│   └── literature/
-│       └── pubmed_fetch.py
-├── results/
-│   ├── pm25/
-│   │   └── {YEAR}/
-│   ├── literature/
-│   │   └── {YEAR}/
-│   └── report_task4.md
-├── scripts/        
-├── tests/
-├── README.md
-
->>>>>>> 79b18243505a5df165a89e81694150f6a9e4d128
 ```
 Pipeline liczy PM2.5 dla wskazanych lat.
 
@@ -85,7 +52,7 @@ Aktualizacja konfiguracji
 
   - policzy brakujące dane PM2.5 dla 2019,
 
-  - pobierze/analitykę PubMed dla 2019,
+  - pobierzeoraz wykona analitykę PubMed dla 2019,
 
   - wygeneruje raport agregujący 2019 i 2024.
 
