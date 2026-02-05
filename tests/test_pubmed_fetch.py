@@ -2,7 +2,7 @@ import pandas as pd
 import sys
 from pathlib import Path
 
-project_root = Path(__file__).resolve().parent.parent  # zakłada, że test jest w katalogu tests/
+project_root = Path(__file__).resolve().parent.parent  
 sys.path.append(str(project_root / "src"))
 
 from literature.pubmed_fetch import parse_pubmed_date
@@ -29,7 +29,6 @@ def test_pubmed_output_csv(tmp_path):
         "PubMedDate": ["2021 Jan 15", "2021 Feb 10"]
     })
 
-    # dodanie kolumny z rokiem
     df["Year"] = df["PubMedDate"].apply(parse_pubmed_date)
 
     # zapis do tymczasowego pliku CSV

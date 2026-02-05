@@ -6,7 +6,6 @@ import os
 import logging
 import sys
 
-# --- konfiguracja logowania ---
 logging.basicConfig(
     level=logging.DEBUG,
     format='[%(levelname)s] %(asctime)s - %(message)s',
@@ -17,7 +16,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# --- funkcje pomocnicze ---
 def parse_pubmed_date(date_str: str) -> int:
     """
     Parsuje datę PubMed w formatach np. "2021 Jan 15", "2024 Dec", "2023"
@@ -25,7 +23,9 @@ def parse_pubmed_date(date_str: str) -> int:
     Jeśli nie uda się sparsować, zwraca 0.
     """
     try:
-        return int(date_str.split()[0])
+        year = int(date_str.split()[0])
+        if len(str(year)) == 4:
+            return year
     except Exception:
         return 0
 
@@ -91,7 +91,6 @@ def summarize_pubmed(df: pd.DataFrame, output_folder: str):
     top_10_journals.columns = ['Journal', 'Counts']
     top_10_journals.to_csv(f"{output_folder}/top_10_journals.csv", index=False)
 
-# --- funkcja główna ---
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", type=int, required=True)
