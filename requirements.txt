@@ -4,3 +4,7 @@ openpyxl
 matplotlib
 seaborn
 requests
+os
+yaml
+pytest
+snakemake

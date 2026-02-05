@@ -1,0 +1,86 @@
+configfile: "config/task4.yaml"
+
+YEARS = config["years"]
+
+
+rule all:
+    input:
+        "results/report_task4.md",
+        
+
+
+rule pm25_year:
+    output:
+        daily="results/pm25/{year}/daily_means.csv",
+        exceed="results/pm25/{year}/exceedance_days.csv"
+    shell:
+        """
+        python src/pm25/run_pm25_year.py --year {wildcards.year}
+        """
+
+rule pubmed_year:
+    output:
+        csv="results/literature/{year}/pubmed_papers.csv",
+        summary="results/literature/{year}/summary_by_year.csv",
+        top10="results/literature/{year}/top_10_journals.csv"
+    log:
+        temp("logs/pubmed_{year}.log")  # <-- temp() zapewnia brak blokad
+    params:
+        config="config/task4.yaml"
+    shell:
+        """
+        python src/literature/pubmed_fetch.py \
+        --year {wildcards.year} \
+        --config {params.config}
+        """
+
+
+rule report_task4:
+    input:
+        pm25=lambda wc: expand("results/pm25/{year}/exceedance_days.csv", year=YEARS),
+        pm25_means=lambda wc: expand("results/pm25/{year}/daily_means.csv", year=YEARS),
+        pubmed=lambda wc: expand("results/literature/{year}/pubmed_papers.csv", year=YEARS),
+        pubmed_summary=lambda wc: expand("results/literature/{year}/summary_by_year.csv", year=YEARS),
+        pubmed_top=lambda wc: expand("results/literature/{year}/top_10_journals.csv", year=YEARS)
+    output:
+        "results/report_task4.md"
+    run:
+        import pandas as pd
+
+        with open(output[0], "w", encoding="utf-8") as f:
+            f.write("# Raport Task 4\n\n")
+
+            f.write("## PM2.5 – podsumowanie\n\n")
+            for year, pm_file, mean_file in zip(YEARS, input.pm25, input.pm25_means):
+                df_days = pd.read_csv(pm_file)
+                df_means = pd.read_csv(mean_file)
+
+                f.write(f"### Rok {year}\n")
+                f.write(f"- Liczba dni z przekroczeniem normy: {len(df_days)}\n")
+                f.write("- Przykładowe średnie dobowe:\n\n")
+                f.write(df_means.head().to_markdown(index=False))
+                f.write("\n\n")
+
+            f.write("## Literatura – PubMed\n\n")
+            for year, pub_file, summ_file, top_file in zip(
+                YEARS, input.pubmed, input.pubmed_summary, input.pubmed_top
+            ):
+                df_pub = pd.read_csv(pub_file)
+                df_sum = pd.read_csv(summ_file)
+                df_top = pd.read_csv(top_file)
+
+                f.write(f"### Rok {year}\n")
+                f.write(f"- Liczba publikacji: {len(df_pub)}\n\n")
+
+                f.write("**Publikacje per rok:**\n\n")
+                f.write(df_sum.to_markdown(index=False))
+                f.write("\n\n")
+
+                f.write("**Top 5 czasopism:**\n\n")
+                f.write(df_top.head().to_markdown(index=False))
+                f.write("\n\n")
+
+                f.write("**Przykładowe tytuły:**\n")
+                for title in df_pub["Title"].head(5):
+                    f.write(f"- {title}\n")
+                f.write("\n")
